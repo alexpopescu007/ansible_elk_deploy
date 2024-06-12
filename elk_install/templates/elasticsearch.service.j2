@@ -1,0 +1,22 @@
+[Unit]
+Description=Elasticsearch
+Documentation=https://www.elastic.co
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Environment="ES_HOME=/opt/elasticsearch-{{ elasticsearch_version }}"
+WorkingDirectory=/opt/elasticsearch-{{ elasticsearch_version }}
+User=elk_stack
+Group=elk_stack
+ExecStart=/opt/elasticsearch-{{ elasticsearch_version }}/bin/elasticsearch
+StandardOutput=journal
+StandardError=journal
+LimitNOFILE=65536
+LimitMEMLOCK=infinity
+TimeoutStopSec=20
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

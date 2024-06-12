@@ -1,0 +1,24 @@
+---
+- name: Restart Logstash
+  systemd:
+    name: logstash
+    state: restarted
+    enabled: yes
+
+- name: Restart Kibana
+  systemd:
+    name: logstash
+    state: restarted
+    enabled: yes
+
+- name: Restart Elasticsearch
+  systemd:
+    name: elasticsearch
+    state: restarted
+    enabled: yes
+
+- name: Restart Filebeat
+  systemd:
+    name: filebeat
+    state: restarted
+    enabled: yes

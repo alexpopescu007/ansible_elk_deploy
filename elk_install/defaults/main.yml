@@ -1,0 +1,8 @@
+---
+logstash_version: "8.12.2"
+kibana_version: "8.12.2"
+elasticsearch_version: "8.12.2"
+filebeat_version: "8.12.2"
+elk_user: elk_stack
+java_package: java-11-openjdk-devel
+ansible_user: elk_stack

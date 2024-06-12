@@ -1,0 +1,43 @@
+- name: Download Filebeat
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{ filebeat_version }}-linux-x86_64.tar.gz"
+    dest: "/tmp/filebeat-{{ filebeat_version }}.tar.gz"
+
+- name: Extract Filebeat archive
+  ansible.builtin.unarchive:
+    src: "/tmp/filebeat-{{ filebeat_version }}.tar.gz"
+    dest: "/opt/"
+    remote_src: yes
+    creates: "/opt/filebeat-{{ filebeat_version }}/"
+
+- name: Create elk_stack group
+  group:
+    name: elk_stack
+    state: present
+
+- name: Create elk_stack user
+  user:
+    name: elk_stack
+    group: elk_stack
+    state: present
+    shell: /usr/sbin/nologin
+    createhome: no
+
+- name: Set permissions for filebeat
+  file:
+    path: "/opt/filebeat-{{ filebeat_version }}/"
+    owner: elk_stack
+    group: elk_stack
+    recurse: yes
+
+- name: Create filebeat systemd service file
+  template:
+    src: "filebeat.service.j2"
+    dest: "/etc/systemd/system/filebeat.service"
+  notify: Restart Logstash
+
+- name: Start filebeat service
+  systemd:
+    name: filebeat
+    state: started
+    enabled: yes

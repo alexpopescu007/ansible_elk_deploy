@@ -1,0 +1,7 @@
+task/main.yml
+
+---
+#- import_tasks: elk_install.yml
+#  become: true
+- import_tasks: filebeat_install.yml
+  become: true

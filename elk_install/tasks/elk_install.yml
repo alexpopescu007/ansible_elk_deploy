@@ -1,0 +1,110 @@
+---
+#- name: Install required packages
+#  package:
+#    name: "{{ java_package }}"
+#    state: present
+#  with_items:
+#    - "{{ java_package }}"
+#    - wget
+- name: Download Logstash
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/logstash/logstash-{{ logstash_version }}-linux-x86_64.tar.gz"
+    dest: "/tmp/logstash-{{ logstash_version }}.tar.gz"
+
+- name: Extract Logstash archive
+  ansible.builtin.unarchive:
+    src: "/tmp/logstash-{{ logstash_version }}.tar.gz"
+    dest: "/opt/"
+    remote_src: yes
+    creates: "/opt/logstash-{{ logstash_version }}/"
+
+- name: Download Kibana
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ kibana_version }}-linux-x86_64.tar.gz"
+    dest: "/tmp/kibana-{{ kibana_version }}.tar.gz"
+
+- name: Extract Kibana archive
+  ansible.builtin.unarchive:
+    src: "/tmp/kibana-{{ kibana_version }}.tar.gz"
+    dest: "/opt/"
+    remote_src: yes
+    creates: "/opt/kibana-{{ kibana_version }}/"
+
+- name: Download Elasticsearch
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}-linux-x86_64.tar.gz"
+    dest: "/tmp/elasticsearch-{{ elasticsearch_version }}.tar.gz"
+
+- name: Extract Elasticsearch archive
+  ansible.builtin.unarchive:
+    src: "/tmp/elasticsearch-{{ elasticsearch_version }}.tar.gz"
+    dest: "/opt/"
+    remote_src: yes
+    creates: "/opt/elasticsearch-{{ elasticsearch_version }}/"
+
+- name: Create elk_stack group
+  group:
+    name: elk_stack
+    state: present
+
+- name: Create elk_stack user
+  user:
+    name: elk_stack
+    group: elk_stack
+    state: present
+    shell: /usr/sbin/nologin
+    createhome: no
+
+
+- name: Set permissions for kibana
+  file:
+    path: "/opt/kibana-{{ kibana_version }}/"
+    owner: elk_stack
+    group: elk_stack
+    recurse: yes
+
+- name: Set permissions for Elasticsearch
+  file:
+    path: "/opt/elasticsearch-{{ elasticsearch_version }}/"
+    owner: elk_stack
+    group: elk_stack
+    recurse: yes
+
+- name: Create Logstash systemd service file
+  template:
+    src: "logstash.service.j2"
+    dest: "/etc/systemd/system/logstash.service"
+  notify: Restart Logstash
+
+- name: Create Kibana systemd service file
+  template:
+    src: "kibana.service.j2"
+    dest: "/etc/systemd/system/kibana.service"
+  notify: Restart Kibana
+
+- name: Create Elasticsearch systemd service file
+  template:
+    src: "elasticsearch.service.j2"
+    dest: "/etc/systemd/system/elasticsearch.service"
+  notify: Restart Elasticsearch
+
+
+- name: Start Kibana service
+  systemd:
+    name: kibana
+    state: started
+    enabled: yes
+
+- name: Start Logstash service
+  systemd:
+    name: logstash
+    state: started
+    enabled: yes
+
+- name: Start Elastic service
+  systemd:
+    name: elasticsearch
+    state: started
+    enabled: yes
+
+

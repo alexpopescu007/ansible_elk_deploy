@@ -1,0 +1,15 @@
+[Unit]
+Description=Logstash
+After=network.target
+
+[Service]
+ExecStart=/opt/logstash-{{ logstash_version }}/bin/logstash
+WorkingDirectory=/opt/logstash-{{ logstash_version }}
+User={{ ansible_user }}
+Group={{ ansible_user }}
+TimeoutStopSec=30
+Restart=always
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=Kibana
+After=network.target
+
+[Service]
+ExecStart=/opt/kibana-{{ kibana_version }}/bin/kibana
+WorkingDirectory=/opt/kibana-{{ kibana_version }}
+User={{ elk_user }}
+Group={{ elk_user }}
+TimeoutStopSec=30
+Restart=always
+KillMode=process
+Environment="NODE_OPTIONS=--max-old-space-size=3072"
+
+[Install]
+WantedBy=multi-user.target
